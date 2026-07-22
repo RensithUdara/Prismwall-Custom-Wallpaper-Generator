@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Prismwall Studio icon">
+  <defs>
+    <linearGradient id="bg" x1="36" y1="28" x2="224" y2="232" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7af0d6"/>
+      <stop offset="0.45" stop-color="#87bfff"/>
+      <stop offset="1" stop-color="#ffcf5a"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="64" y1="58" x2="192" y2="204" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#061118"/>
+      <stop offset="1" stop-color="#19313a"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="#071118"/>
+  <rect x="16" y="16" width="224" height="224" rx="46" fill="url(#bg)"/>
+  <path d="M63 92 161 49l32 102-101 56L63 92Z" fill="none" stroke="url(#edge)" stroke-width="13" stroke-linejoin="round"/>
+  <path d="M63 92 193 151M161 49 92 207M101 76l26 101" fill="none" stroke="#071118" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.68"/>
+  <path d="M88 112 160 83l18 57-75 38-15-66Z" fill="#ffffff" opacity="0.14"/>
+</svg>
