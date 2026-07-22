@@ -266,6 +266,10 @@
       transform: none;
     }
 
+    .button.notice {
+      cursor: pointer;
+    }
+
     .button.primary {
       background: var(--paper);
       color: #0b1214;
@@ -826,6 +830,60 @@
       font-weight: 650;
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(7, 17, 19, 0.74);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .download-modal {
+      width: min(520px, 100%);
+      border: 1px solid rgba(247, 244, 237, 0.14);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(138, 223, 192, 0.12), transparent 44%),
+        #101416;
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .modal-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      background: url("assets/brand/app-icon.svg") center / cover no-repeat;
+      margin-bottom: 20px;
+    }
+
+    .download-modal h3 {
+      font-size: 26px;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .download-modal p {
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 18px;
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
     footer a {
       color: var(--muted);
       text-decoration: none;
@@ -1185,7 +1243,7 @@
           </p>
           <div class="download-actions reveal" style="margin-top: 28px;">
             <a class="button primary" href="./dist/generator/index.html">Open Generator</a>
-            <span class="button disabled" aria-disabled="true">Mac build pending</span>
+            <a class="button notice" id="openMacNotice" href="./assets/downloads/mac.html">Mac build pending</a>
             <a class="button" href="./assets/downloads/windows.zip" download>Download for Windows</a>
           </div>
         </div>
@@ -1262,6 +1320,21 @@
       <span>Copyright 2026 Prismwall Studio. All rights reserved.</span>
       <a href="#top">Back to top</a>
     </footer>
+
+    <div class="modal-backdrop" id="macNotice" role="dialog" aria-modal="true" aria-labelledby="macNoticeTitle">
+      <div class="download-modal">
+        <div class="modal-icon" aria-hidden="true"></div>
+        <h3 id="macNoticeTitle">Mac download is being rebuilt.</h3>
+        <p>
+          The old DMG was removed so visitors do not download an outdated app. A new macOS DMG must be generated on a Mac, but the Windows build is ready now.
+        </p>
+        <div class="modal-actions">
+          <a class="button primary" href="./assets/downloads/windows.zip" download>Download Windows</a>
+          <a class="button" href="./dist/generator/index.html">Open Web Generator</a>
+          <button class="button" id="closeMacNotice" type="button">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1384,6 +1457,34 @@
           });
           if (!isOpen) item.classList.add("open");
         });
+      });
+    })();
+
+    (function () {
+      var modal = document.getElementById("macNotice");
+      var open = document.getElementById("openMacNotice");
+      var close = document.getElementById("closeMacNotice");
+      if (!modal || !open || !close) return;
+
+      function setOpen(isOpen) {
+        modal.classList.toggle("open", isOpen);
+      }
+
+      open.addEventListener("click", function (event) {
+        event.preventDefault();
+        setOpen(true);
+      });
+
+      close.addEventListener("click", function () {
+        setOpen(false);
+      });
+
+      modal.addEventListener("click", function (event) {
+        if (event.target === modal) setOpen(false);
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") setOpen(false);
       });
     })();
   </script>
