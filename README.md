@@ -2,7 +2,9 @@
 
 > A portfolio-style website and functional wallpaper generator for creating crisp desktop and mobile wallpapers with clean patterns, tuned palettes, shareable seeds, and instant exports.
 
-![Prismwall Studio](assets/brand/app-icon.svg)
+<p align="center">
+  <img src="assets/brand/app-icon.svg" alt="Prismwall Studio" width="180">
+</p>
 
 ## 🚀 Live Demo
 
@@ -273,4 +275,3 @@ Built by **Rensith Udara**.
 ## 📄 License
 
 This project is currently private/personal. Add a license file before distributing publicly.
-
