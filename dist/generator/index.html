@@ -223,13 +223,26 @@
       gap: 8px;
     }
 
+    .triple-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
     .field-row {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 8px;
     }
 
-    .seed-input {
+    .two-field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .seed-input,
+    .size-input {
       min-width: 0;
       width: 100%;
       padding: 10px 12px;
@@ -241,9 +254,31 @@
       font-weight: 650;
     }
 
-    .seed-input:focus {
+    .seed-input:focus,
+    .size-input:focus {
       outline: 2px solid var(--accent);
       outline-offset: 2px;
+    }
+
+    .check-row {
+      min-height: 42px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .check-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
     }
 
     .export-group {
@@ -309,7 +344,8 @@
       gap: 8px;
     }
 
-    .recent-card {
+    .recent-card,
+    .favorite-card {
       border: 1px solid var(--border);
       border-radius: 8px;
       background: var(--bg-card);
@@ -324,11 +360,19 @@
       transform: translateY(-1px);
     }
 
-    .recent-card canvas {
+    .recent-card canvas,
+    .favorite-card canvas {
       width: 100%;
       aspect-ratio: 16 / 10;
       border-radius: 6px;
       display: block;
+    }
+
+    .empty-note {
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.5;
+      grid-column: 1 / -1;
     }
 
     .status-line {
@@ -425,6 +469,15 @@
       </div>
 
       <div class="control-group">
+        <div class="control-label">History</div>
+        <div class="triple-grid">
+          <button class="btn-shuffle" id="btnUndo" title="Undo">Undo</button>
+          <button class="btn-shuffle" id="btnRedo" title="Redo">Redo</button>
+          <button class="btn-shuffle" id="btnFavorite" title="Save favorite">Save</button>
+        </div>
+      </div>
+
+      <div class="control-group">
         <div class="control-label">Seed</div>
         <div class="field-row">
           <input class="seed-input" id="seedInput" type="number" min="0" max="999999" step="1" inputmode="numeric">
@@ -464,7 +517,17 @@
         <div class="recent-grid" id="recentGrid"></div>
       </div>
 
+      <div class="control-group">
+        <div class="control-label">Favorites</div>
+        <div class="recent-grid" id="favoriteGrid"></div>
+      </div>
+
       <div class="export-group">
+        <label class="check-row" for="includeClock">
+          <span>Include clock overlay</span>
+          <input id="includeClock" type="checkbox">
+        </label>
+
         <button class="btn-apply" id="btnApply">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
@@ -488,6 +551,16 @@
         <button class="btn-export btn-mobile" id="btnBoth">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10"/><path d="m8 9 4 4 4-4"/><path d="M5 19h14"/></svg>
           Download Both
+        </button>
+
+        <div class="control-label">Custom export</div>
+        <div class="two-field-row">
+          <input class="size-input" id="customWidth" type="number" min="320" max="7680" step="10" value="1920" aria-label="Custom width">
+          <input class="size-input" id="customHeight" type="number" min="320" max="7680" step="10" value="1080" aria-label="Custom height">
+        </div>
+        <button class="btn-export btn-mobile" id="btnCustom">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="10" height="10" rx="1"/><path d="M7 13v2h6v-2M13 7h2v6"/></svg>
+          Download Custom
         </button>
       </div>
     </div>
