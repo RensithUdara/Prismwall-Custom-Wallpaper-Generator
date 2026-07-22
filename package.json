@@ -1,0 +1,14 @@
+{
+  "name": "prismwall-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Portfolio-style web app and desktop wallpaper generator for Prismwall Studio.",
+  "scripts": {
+    "preview": "python -m http.server 5178 --bind 127.0.0.1",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.2"
+  }
+}
