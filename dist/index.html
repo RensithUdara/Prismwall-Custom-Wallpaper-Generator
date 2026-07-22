@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Prismwall Studio is a fast portfolio-style wallpaper generator for crisp desktop and mobile backgrounds.">
+  <title>Prismwall Studio - Custom Wallpaper Generator</title>
+  <link rel="icon" type="image/svg+xml" href="images/app-icon.svg">
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f7f4ed;
+      --muted: #b6b2aa;
+      --soft: #7f7a72;
+      --line: rgba(247, 244, 237, 0.14);
+      --line-strong: rgba(247, 244, 237, 0.28);
+      --panel: rgba(18, 22, 24, 0.78);
+      --panel-solid: #14181a;
+      --paper: #f7f4ed;
+      --night: #071113;
+      --mint: #8adfc0;
+      --coral: #ff8f70;
+      --gold: #e6c76f;
+      --sky: #87bfff;
+      --shadow: 0 28px 90px rgba(0, 0, 0, 0.38);
+      --radius: 8px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--night);
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(7, 17, 19, 0.1), #071113 720px),
+        radial-gradient(circle at 16% 18%, rgba(138, 223, 192, 0.2), transparent 30%),
+        radial-gradient(circle at 82% 8%, rgba(255, 143, 112, 0.16), transparent 28%),
+        #071113;
+      color: var(--ink);
+      font-family: var(--font);
+      letter-spacing: 0;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    img,
+    svg {
+      display: block;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page-shell {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ambient-canvas {
+      position: absolute;
+      inset: 0 0 auto;
+      width: 100%;
+      height: 760px;
+      opacity: 0.78;
+      pointer-events: none;
+      mask-image: linear-gradient(#000 55%, transparent);
+    }
+
+    .nav {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 16px clamp(18px, 4vw, 56px);
+      border-bottom: 1px solid rgba(247, 244, 237, 0.1);
+      background: rgba(7, 17, 19, 0.74);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--ink);
+      text-decoration: none;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      border: 1px solid rgba(247, 244, 237, 0.3);
+      border-radius: 8px;
+      background:
+        url("images/app-icon.svg") center / cover no-repeat,
+        #142023;
+      box-shadow: 0 14px 38px rgba(0, 0, 0, 0.34);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      display: none;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 650;
+      transition: color 0.18s ease;
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--ink);
+    }
+
+    .nav-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 0 18px;
+      border: 1px solid rgba(247, 244, 237, 0.24);
+      border-radius: 8px;
+      background: var(--paper);
+      color: #0b1214 !important;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+    }
+
+    section {
+      padding-inline: clamp(18px, 4vw, 56px);
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      align-items: center;
+      grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+      gap: clamp(32px, 5vw, 76px);
+      padding-top: 118px;
+      padding-bottom: 64px;
+    }
+
+    .hero-copy {
+      max-width: 610px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--mint);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    h1 {
+      max-width: 690px;
+      font-size: clamp(54px, 9vw, 126px);
+      line-height: 0.9;
+      font-weight: 900;
+      letter-spacing: 0;
+      margin-bottom: 24px;
+    }
+
+    .hero-text {
+      max-width: 560px;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 21px);
+      line-height: 1.62;
+      margin-bottom: 34px;
+    }
+
+    .hero-actions,
+    .download-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: rgba(247, 244, 237, 0.08);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 800;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .button svg {
+      width: 19px;
+      height: 19px;
+      flex: 0 0 19px;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+      background: rgba(247, 244, 237, 0.12);
+    }
+
+    .button.disabled {
+      cursor: not-allowed;
+      opacity: 0.56;
+      transform: none;
+    }
+
+    .button.primary {
+      background: var(--paper);
+      color: #0b1214;
+      border-color: transparent;
+      box-shadow: 0 16px 42px rgba(247, 244, 237, 0.14);
+    }
+
+    .hero-note {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      margin-top: 22px;
+      color: var(--soft);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .hero-note span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-note span::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--gold);
+    }
+
+    .product-stage {
+      position: relative;
+      align-self: end;
+      min-height: min(68vw, 650px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-stack {
+      position: relative;
+      width: min(100%, 760px);
+      aspect-ratio: 1.08 / 1;
+    }
+
+    .device {
+      position: absolute;
+      overflow: hidden;
+      border: 1px solid rgba(247, 244, 237, 0.18);
+      background: #101516;
+      box-shadow: var(--shadow);
+    }
+
+    .device img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .desktop-device {
+      inset: 9% 0 16% 0;
+      border-radius: 8px;
+    }
+
+    .desktop-device::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border: 10px solid rgba(10, 14, 15, 0.92);
+      border-bottom-width: 26px;
+    }
+
+    .phone-device {
+      width: 25%;
+      min-width: 126px;
+      aspect-ratio: 9 / 19.5;
+      right: 5%;
+      bottom: 2%;
+      border-radius: 28px;
+      border: 8px solid #101416;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+    }
+
+    .floating-panel {
+      position: absolute;
+      left: 6%;
+      bottom: 4%;
+      width: min(270px, 42%);
+      padding: 16px;
+      border: 1px solid rgba(247, 244, 237, 0.16);
+      border-radius: 8px;
+      background: rgba(9, 15, 17, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    .panel-title {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .swatch {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      border: 1px solid rgba(247, 244, 237, 0.2);
+    }
+
+    .mini-row {
+      display: grid;
+      grid-template-columns: 1fr 34px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .mini-line {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(247, 244, 237, 0.14);
+      overflow: hidden;
+    }
+
+    .mini-line::before {
+      content: "";
+      display: block;
+      width: 68%;
+      height: 100%;
+      background: var(--mint);
+    }
+
+    .mini-pill {
+      min-height: 24px;
+      border-radius: 8px;
+      background: var(--paper);
+    }
+
+    .section-head {
+      max-width: 740px;
+      margin-bottom: 34px;
+    }
+
+    .section-kicker {
+      color: var(--coral);
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 0.98;
+      font-weight: 900;
+      letter-spacing: 0;
+      margin-bottom: 18px;
+    }
+
+    .section-copy {
+      max-width: 620px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.68;
+    }
+
+    .studio-strip {
+      padding-top: 44px;
+      padding-bottom: 44px;
+      border-block: 1px solid rgba(247, 244, 237, 0.08);
+      background: rgba(247, 244, 237, 0.035);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      border: 1px solid rgba(247, 244, 237, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(247, 244, 237, 0.08);
+    }
+
+    .metric {
+      min-height: 118px;
+      padding: 22px;
+      background: rgba(7, 17, 19, 0.9);
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--ink);
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .metric span {
+      color: var(--soft);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .preview-section,
+    .features,
+    .workflow,
+    .download,
+    .faq {
+      padding-top: clamp(82px, 11vw, 136px);
+      padding-bottom: clamp(82px, 11vw, 136px);
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .slider {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      min-height: 280px;
+      border: 1px solid rgba(247, 244, 237, 0.14);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      cursor: ew-resize;
+      user-select: none;
+      background: #101416;
+    }
+
+    .slider-layer {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .slider-layer.dark {
+      background-image: url("images/dark.png");
+    }
+
+    .slider-layer.light {
+      background-image: url("images/light.png");
+      clip-path: inset(0 0 0 52%);
+    }
+
+    .slider-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 52%;
+      width: 2px;
+      background: var(--paper);
+      box-shadow: 0 0 0 999px transparent;
+    }
+
+    .slider-grip {
+      position: absolute;
+      top: 50%;
+      left: 52%;
+      width: 46px;
+      height: 46px;
+      border: 1px solid rgba(7, 17, 19, 0.18);
+      border-radius: 999px;
+      background: var(--paper);
+      color: #0b1214;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.4);
+      pointer-events: none;
+    }
+
+    .slider-grip svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .preview-aside {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 22px;
+      border: 1px solid rgba(247, 244, 237, 0.1);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 18px 55px rgba(0, 0, 0, 0.18);
+    }
+
+    .mode-labels {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mode-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(247, 244, 237, 0.1);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .mode-label strong {
+      color: var(--ink);
+    }
+
+    .aside-note {
+      color: var(--soft);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .feature-card {
+      min-height: 238px;
+      padding: 24px;
+      border: 1px solid rgba(247, 244, 237, 0.1);
+      border-radius: 8px;
+      background: rgba(247, 244, 237, 0.045);
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      background: rgba(247, 244, 237, 0.07);
+      border-color: rgba(247, 244, 237, 0.2);
+    }
+
+    .feature-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(247, 244, 237, 0.12);
+      border-radius: 8px;
+      background: rgba(7, 17, 19, 0.54);
+      color: var(--mint);
+      margin-bottom: 28px;
+    }
+
+    .feature-icon svg {
+      width: 21px;
+      height: 21px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .feature-card h3 {
+      color: var(--ink);
+      font-size: 20px;
+      line-height: 1.18;
+      font-weight: 850;
+      margin-bottom: 10px;
+    }
+
+    .feature-card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.62;
+    }
+
+    .workflow {
+      background: #f2eee4;
+      color: #101416;
+    }
+
+    .workflow .section-kicker {
+      color: #996548;
+    }
+
+    .workflow .section-copy {
+      color: #5c625f;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      counter-reset: step;
+    }
+
+    .step {
+      min-height: 260px;
+      padding: 26px;
+      border: 1px solid rgba(16, 20, 22, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.36);
+      counter-increment: step;
+    }
+
+    .step::before {
+      content: "0" counter(step);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: #101416;
+      color: #f2eee4;
+      font-size: 14px;
+      font-weight: 900;
+      margin-bottom: 36px;
+    }
+
+    .step h3 {
+      font-size: 22px;
+      line-height: 1.16;
+      margin-bottom: 12px;
+    }
+
+    .step p {
+      color: #59605d;
+      font-size: 15px;
+      line-height: 1.62;
+    }
+
+    .download {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(300px, 0.65fr);
+      gap: 28px;
+      align-items: center;
+    }
+
+    .download-panel {
+      padding: clamp(24px, 4vw, 38px);
+      border: 1px solid rgba(247, 244, 237, 0.14);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(138, 223, 192, 0.1), transparent 40%),
+        var(--panel-solid);
+      box-shadow: var(--shadow);
+    }
+
+    .download-list {
+      display: grid;
+      gap: 12px;
+      list-style: none;
+    }
+
+    .download-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(247, 244, 237, 0.1);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .download-list li:last-child {
+      border-bottom: 0;
+    }
+
+    .download-list strong {
+      color: var(--ink);
+    }
+
+    .faq {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .faq-list {
+      border-top: 1px solid rgba(247, 244, 237, 0.12);
+    }
+
+    .faq-item {
+      border-bottom: 1px solid rgba(247, 244, 237, 0.12);
+    }
+
+    .faq-question {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      min-height: 76px;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .faq-question svg {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .faq-answer {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.22s ease;
+    }
+
+    .faq-answer > div {
+      overflow: hidden;
+    }
+
+    .faq-answer p {
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.72;
+      padding: 0 52px 24px 0;
+    }
+
+    .faq-item.open .faq-answer {
+      grid-template-rows: 1fr;
+    }
+
+    .faq-item.open .faq-question svg {
+      transform: rotate(45deg);
+    }
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 28px clamp(18px, 4vw, 56px);
+      border-top: 1px solid rgba(247, 244, 237, 0.1);
+      color: var(--soft);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .comparison,
+      .download {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+        padding-top: 128px;
+      }
+
+      .product-stage {
+        min-height: auto;
+      }
+
+      .preview-stack {
+        aspect-ratio: 1.16 / 1;
+      }
+
+      .features-grid,
+      .steps,
+      .metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .preview-aside {
+        min-height: 210px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .nav {
+        padding: 13px 16px;
+      }
+
+      .brand-name {
+        font-size: 14px;
+      }
+
+      .nav-links {
+        gap: 10px;
+      }
+
+      .nav-links a:not(.nav-action) {
+        display: none;
+      }
+
+      .nav-action {
+        min-height: 36px;
+        padding-inline: 14px;
+      }
+
+      h1 {
+        font-size: clamp(48px, 18vw, 74px);
+      }
+
+      .hero-actions,
+      .download-actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .floating-panel {
+        position: relative;
+        left: auto;
+        bottom: auto;
+        width: 100%;
+        margin-top: 12px;
+      }
+
+      .preview-stack {
+        display: grid;
+        gap: 12px;
+        aspect-ratio: auto;
+      }
+
+      .desktop-device,
+      .phone-device {
+        position: relative;
+        inset: auto;
+      }
+
+      .desktop-device {
+        aspect-ratio: 16 / 10;
+      }
+
+      .phone-device {
+        width: min(46%, 170px);
+        justify-self: end;
+      }
+
+      .metrics,
+      .features-grid,
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-card,
+      .step {
+        min-height: auto;
+      }
+
+      .slider {
+        min-height: 220px;
+      }
+
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <canvas class="ambient-canvas" id="ambientCanvas" aria-hidden="true"></canvas>
+
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="Prismwall Studio home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">Prismwall Studio</span>
+      </a>
+      <div class="nav-links">
+        <a href="#preview">Preview</a>
+        <a href="./generator/index.html">Generator</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+        <a class="nav-action" href="#download">Download</a>
+      </div>
+    </nav>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow reveal">Custom wallpaper studio</p>
+          <h1 id="hero-title" class="reveal">Prismwall Studio</h1>
+          <p class="hero-text reveal">
+            Create sharp, minimal wallpapers for desktop and mobile with tuned palettes, clean patterns, and instant exports.
+          </p>
+          <div class="hero-actions reveal">
+            <a class="button primary" href="./generator/index.html">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Open Generator
+            </a>
+            <a class="button" href="#download">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+              Download App
+            </a>
+          </div>
+          <p class="hero-note reveal">
+            <span>Web generator included</span>
+            <span>Windows 10 and newer</span>
+            <span>macOS build requires macOS</span>
+          </p>
+        </div>
+
+        <div class="product-stage reveal" aria-label="Prismwall Studio app preview">
+          <div class="preview-stack">
+            <div class="device desktop-device">
+              <img src="images/dark.png" alt="Dark abstract wallpaper generated in Prismwall Studio">
+            </div>
+            <div class="device phone-device">
+              <img src="images/light.png" alt="Light abstract wallpaper generated in Prismwall Studio">
+            </div>
+            <div class="floating-panel" aria-hidden="true">
+              <p class="panel-title">Palette mixer</p>
+              <div class="swatches">
+                <span class="swatch" style="background:#8adfc0"></span>
+                <span class="swatch" style="background:#ff8f70"></span>
+                <span class="swatch" style="background:#e6c76f"></span>
+                <span class="swatch" style="background:#87bfff"></span>
+              </div>
+              <div class="mini-row">
+                <span class="mini-line"></span>
+                <span class="mini-pill"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="studio-strip" aria-label="Export highlights">
+        <div class="metrics reveal">
+          <div class="metric">
+            <strong>4K</strong>
+            <span>Desktop wallpaper exports</span>
+          </div>
+          <div class="metric">
+            <strong>1290</strong>
+            <span>Pixel-wide mobile output</span>
+          </div>
+          <div class="metric">
+            <strong>2</strong>
+            <span>Light and dark theme styles</span>
+          </div>
+          <div class="metric">
+            <strong>1</strong>
+            <span>Click to generate a fresh design</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="preview-section" id="preview" aria-labelledby="preview-title">
+        <div class="section-head">
+          <p class="section-kicker reveal">Live preview</p>
+          <h2 class="section-title reveal" id="preview-title">Compare the mood before you export.</h2>
+          <p class="section-copy reveal">
+            Drag across the preview to compare dark and light wallpaper styles using the same pattern family.
+          </p>
+        </div>
+
+        <div class="comparison">
+          <div class="slider reveal" id="modeSlider" aria-label="Drag to compare dark and light wallpaper previews">
+            <div class="slider-layer dark"></div>
+            <div class="slider-layer light" id="sliderLight"></div>
+            <div class="slider-divider" id="sliderDivider"></div>
+            <div class="slider-grip" id="sliderGrip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5"/><path d="m16 7 5 5-5 5"/></svg>
+            </div>
+          </div>
+
+          <aside class="preview-aside reveal">
+            <div class="mode-labels">
+              <div class="mode-label"><strong>Dark mode</strong><span>Focused</span></div>
+              <div class="mode-label"><strong>Light mode</strong><span>Calm</span></div>
+              <div class="mode-label"><strong>Pattern</strong><span>Adaptive</span></div>
+            </div>
+            <p class="aside-note">
+              Prismwall Studio keeps the design crisp while shifting contrast and color weight for each theme.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="features" id="features" aria-labelledby="features-title">
+        <div class="section-head">
+          <p class="section-kicker reveal">Built for clean screens</p>
+          <h2 class="section-title reveal" id="features-title">Design options without visual noise.</h2>
+          <p class="section-copy reveal">
+            Every control is focused on producing a wallpaper you can actually live with on a busy desktop or lock screen.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+            </div>
+            <h3>Desktop exports</h3>
+            <p>Render wide 3840 by 2160 wallpapers that stay sharp on high-density monitors.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/></svg>
+            </div>
+            <h3>Mobile sizing</h3>
+            <p>Create tall mobile wallpapers for home screens, lock screens, and matching device sets.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 7h14M5 17h14"/><path d="M7 7c3 3 7 3 10 0M7 17c3-3 7-3 10 0"/></svg>
+            </div>
+            <h3>Pattern families</h3>
+            <p>Generate arcs, waves, hills, gradients, and layered abstract systems from one studio.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a7 7 0 0 0 7-7c0-5-7-13-7-13S5 10 5 15a7 7 0 0 0 7 7z"/></svg>
+            </div>
+            <h3>Color control</h3>
+            <p>Pick careful palettes or shuffle new combinations until the wallpaper feels right.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9v9h9z"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
+            </div>
+            <h3>Theme matching</h3>
+            <p>Build light and dark versions of the same design for a consistent system setup.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m13 2-10 12h8l-1 8 11-13h-8l1-7z"/></svg>
+            </div>
+            <h3>Fast generation</h3>
+            <p>Generate fresh wallpaper variations quickly without sign-ins, ads, or a heavy workflow.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="workflow" aria-labelledby="workflow-title">
+        <div class="section-head">
+          <p class="section-kicker reveal">Workflow</p>
+          <h2 class="section-title reveal" id="workflow-title">A simple path from idea to wallpaper.</h2>
+          <p class="section-copy reveal">
+            Prismwall Studio keeps the process short so you can make a matching set in minutes.
+          </p>
+        </div>
+
+        <div class="steps">
+          <article class="step reveal">
+            <h3>Choose a pattern</h3>
+            <p>Start with a clean structure such as waves, arcs, layered gradients, or soft hills.</p>
+          </article>
+          <article class="step reveal">
+            <h3>Tune the palette</h3>
+            <p>Adjust colors and contrast until the wallpaper fits your device and workspace.</p>
+          </article>
+          <article class="step reveal">
+            <h3>Export your set</h3>
+            <p>Save desktop and mobile versions so your screens feel consistent everywhere.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="download" id="download" aria-labelledby="download-title">
+        <div>
+          <p class="section-kicker reveal">Download</p>
+          <h2 class="section-title reveal" id="download-title">Open the generator or install the desktop app.</h2>
+          <p class="section-copy reveal">
+            Use the web generator instantly, or install the desktop app for the same wallpaper workflow on macOS and Windows.
+          </p>
+          <div class="download-actions reveal" style="margin-top: 28px;">
+            <a class="button primary" href="./generator/index.html">Open Generator</a>
+            <span class="button disabled" aria-disabled="true">Mac build pending</span>
+            <a class="button" href="./downloads/windows.zip" download>Download for Windows</a>
+          </div>
+        </div>
+
+        <div class="download-panel reveal">
+          <ul class="download-list">
+            <li><strong>Price</strong><span>Free</span></li>
+            <li><strong>Account</strong><span>Not required</span></li>
+            <li><strong>macOS</strong><span>Build on macOS required</span></li>
+            <li><strong>Windows</strong><span>Version 10 or newer</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="faq" id="faq" aria-labelledby="faq-title">
+        <div class="section-head">
+          <p class="section-kicker reveal">FAQ</p>
+          <h2 class="section-title reveal" id="faq-title">Helpful answers.</h2>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-item reveal open">
+            <button class="faq-question" type="button">
+              <span>Is Prismwall Studio free?</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <div class="faq-answer">
+              <div>
+                <p>Yes. You can generate, export, and use wallpapers without a subscription, account, or advertising.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item reveal">
+            <button class="faq-question" type="button">
+              <span>What image sizes can I export?</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <div class="faq-answer">
+              <div>
+                <p>Desktop wallpapers export at 3840 by 2160. Mobile wallpapers export at 1290 by 2796 for tall phone screens.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item reveal">
+            <button class="faq-question" type="button">
+              <span>Can I make matching light and dark versions?</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <div class="faq-answer">
+              <div>
+                <p>Yes. Prismwall Studio lets you keep the pattern while adjusting the palette and contrast for light or dark themes.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item reveal">
+            <button class="faq-question" type="button">
+              <span>Do I need to sign in?</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <div class="faq-answer">
+              <div>
+                <p>No. Download the app and start generating wallpapers immediately.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Copyright 2026 Prismwall Studio. All rights reserved.</span>
+      <a href="#top">Back to top</a>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var canvas = document.getElementById("ambientCanvas");
+      var ctx = canvas.getContext("2d");
+      var shapes = [];
+      var colors = ["#8adfc0", "#ff8f70", "#e6c76f", "#87bfff"];
+
+      function resize() {
+        var ratio = window.devicePixelRatio || 1;
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      }
+
+      function resetShapes() {
+        shapes = [];
+        var width = canvas.offsetWidth;
+        var height = canvas.offsetHeight;
+        for (var i = 0; i < 24; i += 1) {
+          shapes.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            size: 40 + Math.random() * 170,
+            speed: 0.14 + Math.random() * 0.22,
+            color: colors[i % colors.length],
+            phase: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      function draw() {
+        var width = canvas.offsetWidth;
+        var height = canvas.offsetHeight;
+        ctx.clearRect(0, 0, width, height);
+        shapes.forEach(function (shape, index) {
+          shape.y += shape.speed;
+          shape.x += Math.sin(Date.now() / 1800 + shape.phase) * 0.18;
+          if (shape.y - shape.size > height) {
+            shape.y = -shape.size;
+            shape.x = Math.random() * width;
+          }
+          ctx.save();
+          ctx.globalAlpha = 0.05 + (index % 4) * 0.012;
+          ctx.translate(shape.x, shape.y);
+          ctx.rotate(shape.phase + Date.now() / 12000);
+          ctx.strokeStyle = shape.color;
+          ctx.lineWidth = 1.4;
+          ctx.strokeRect(-shape.size / 2, -shape.size / 2, shape.size, shape.size);
+          ctx.restore();
+        });
+        window.requestAnimationFrame(draw);
+      }
+
+      resize();
+      resetShapes();
+      draw();
+
+      window.addEventListener("resize", function () {
+        resize();
+        resetShapes();
+      });
+    })();
+
+    (function () {
+      var slider = document.getElementById("modeSlider");
+      var light = document.getElementById("sliderLight");
+      var divider = document.getElementById("sliderDivider");
+      var grip = document.getElementById("sliderGrip");
+      var dragging = false;
+
+      function setPosition(clientX) {
+        var rect = slider.getBoundingClientRect();
+        var percent = ((clientX - rect.left) / rect.width) * 100;
+        percent = Math.max(4, Math.min(96, percent));
+        light.style.clipPath = "inset(0 0 0 " + percent + "%)";
+        divider.style.left = percent + "%";
+        grip.style.left = percent + "%";
+      }
+
+      slider.addEventListener("pointerdown", function (event) {
+        dragging = true;
+        slider.setPointerCapture(event.pointerId);
+        setPosition(event.clientX);
+      });
+
+      slider.addEventListener("pointermove", function (event) {
+        if (dragging) setPosition(event.clientX);
+      });
+
+      slider.addEventListener("pointerup", function () {
+        dragging = false;
+      });
+
+      slider.addEventListener("pointercancel", function () {
+        dragging = false;
+      });
+    })();
+
+    (function () {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) entry.target.classList.add("visible");
+        });
+      }, { threshold: 0.12 });
+
+      document.querySelectorAll(".reveal").forEach(function (element) {
+        observer.observe(element);
+      });
+    })();
+
+    (function () {
+      document.querySelectorAll(".faq-question").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var item = button.closest(".faq-item");
+          var isOpen = item.classList.contains("open");
+          document.querySelectorAll(".faq-item").forEach(function (entry) {
+            entry.classList.remove("open");
+          });
+          if (!isOpen) item.classList.add("open");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
