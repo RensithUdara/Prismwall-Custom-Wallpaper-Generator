@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prismwall Studio - Generator</title>
+  <link rel="icon" type="image/svg+xml" href="../images/app-icon.svg">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .create-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 24px;
+      padding: 24px;
+      padding-top: 68px;
+      height: 100vh;
+    }
+
+    .preview-area {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .preview-wrap {
+      position: relative;
+    }
+
+    .preview-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .preview-wrap canvas {
+      border-radius: 16px;
+      border: 2px solid var(--border);
+      display: block;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    .preview-summary {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      max-width: 760px;
+    }
+
+    .summary-pill {
+      min-height: 32px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 650;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .summary-pill strong {
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      padding-right: 4px;
+      padding-top: 44px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .style-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .style-btn {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+      overflow: hidden;
+    }
+
+    .style-btn canvas {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: 10px;
+      display: block;
+    }
+
+    .style-btn:hover { border-color: var(--text-muted); }
+    .style-btn.active { border-color: var(--text); }
+
+    .selected-detail {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      min-height: 18px;
+    }
+
+    .palette-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .palette-swatch {
+      width: 36px;
+      height: 36px;
+      border-radius: 50px;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: var(--transition);
+      padding: 0;
+      background: none;
+    }
+
+    .palette-swatch span {
+      flex: 1;
+      display: block;
+    }
+
+    .palette-swatch:hover { border-color: var(--text-muted); }
+    .palette-swatch.active { border-color: var(--text); }
+
+    .mode-toggle {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .mode-btn:hover { border-color: var(--text-muted); color: var(--text); }
+    .mode-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+    .mode-icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+
+    .mode-icon-dark { background: #222; border: 1px solid #555; }
+    .mode-icon-light { background: #eee; border: 1px solid #ccc; }
+
+    .btn-shuffle {
+      width: 100%;
+      padding: 12px;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: var(--transition);
+    }
+
+    .btn-shuffle:hover { background: var(--bg-hover); border-color: var(--text-muted); }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    .seed-input {
+      min-width: 0;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .seed-input:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .export-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-export {
+      width: 100%;
+      padding: 12px;
+      border-radius: 50px;
+      border: none;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .btn-desktop { background: var(--text); color: var(--bg); }
+    .btn-desktop:hover { opacity: 0.85; }
+    .btn-mobile { background: var(--bg-card); color: var(--text); border: 1px solid var(--border) !important; }
+    .btn-mobile:hover { background: var(--bg-hover); }
+
+    .btn-apply {
+      width: 100%;
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: none;
+      background: var(--text);
+      color: var(--bg);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-apply:hover { opacity: 0.85; }
+    .btn-apply:disabled { opacity: 0.6; cursor: default; }
+
+    .size-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: -4px;
+    }
+
+    .recent-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .recent-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      cursor: pointer;
+      overflow: hidden;
+      padding: 4px;
+      transition: var(--transition);
+    }
+
+    .recent-card:hover {
+      border-color: var(--text-muted);
+      transform: translateY(-1px);
+    }
+
+    .recent-card canvas {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: 6px;
+      display: block;
+    }
+
+    .status-line {
+      min-height: 18px;
+      color: var(--text-muted);
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<nav data-tauri-drag-region>
+  <a href="../index.html" class="nav-logo" title="Prismwall Studio">
+    <span class="nav-logo-mark" aria-hidden="true"></span>
+    <span class="nav-logo-text">Prismwall Studio</span>
+  </a>
+
+  <div class="nav-tabs">
+    <a href="../index.html" class="nav-tab" title="Home">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 8l6-5.5L14 8"/><path d="M3.5 7v5.5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7"/>
+      </svg>
+    </a>
+    <a href="index.html" class="nav-tab active" title="Generator">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3v10M3 8h10"/>
+      </svg>
+    </a>
+  </div>
+
+  <div class="nav-actions">
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="themeDark" title="Dark" style="border: none; cursor: pointer;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M7 1a6 6 0 1 0 0 12A4.5 4.5 0 0 1 7 1z"/>
+        </svg>
+      </button>
+      <button class="nav-tab" id="themeLight" title="Light" style="border: none; cursor: pointer;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="7" cy="7" r="3"/>
+          <path d="M7 1v1.5M7 12.5V14M1 7h1.5M12.5 7H14M2.8 2.8l1 1M10.2 10.2l1 1M2.8 11.2l1-1M10.2 3.8l1-1"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="create-layout">
+    <div class="preview-area">
+      <div class="preview-container">
+        <div class="preview-wrap">
+          <div class="preview-label">Desktop 4K</div>
+          <canvas id="previewDesktop" width="640" height="360"></canvas>
+        </div>
+        <div class="preview-wrap">
+          <div class="preview-label">iPhone</div>
+          <canvas id="previewMobile" width="145" height="314"></canvas>
+        </div>
+      </div>
+      <div class="preview-summary">
+        <div class="summary-pill">Pattern <strong id="summaryPattern">Hills</strong></div>
+        <div class="summary-pill">Palette <strong id="summaryPalette">Charcoal</strong></div>
+        <div class="summary-pill">Seed <strong id="summarySeed">0</strong></div>
+      </div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <div class="control-label">Pattern</div>
+        <div class="style-grid" id="styleGrid"></div>
+        <div class="selected-detail" id="selectedPattern">Hills</div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">Palette</div>
+        <div class="palette-row" id="paletteRow"></div>
+        <div class="selected-detail" id="selectedPalette">Charcoal</div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">Mode</div>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="btnDark">
+            <span class="mode-icon mode-icon-dark"></span>
+            Dark
+          </button>
+          <button class="mode-btn" id="btnLight">
+            <span class="mode-icon mode-icon-light"></span>
+            Light
+          </button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">Seed</div>
+        <div class="field-row">
+          <input class="seed-input" id="seedInput" type="number" min="0" max="999999" step="1" inputmode="numeric">
+          <button class="btn-shuffle" id="btnUseSeed" title="Apply seed">Apply</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="action-grid">
+          <button class="btn-shuffle" id="btnShuffle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            Shuffle
+          </button>
+          <button class="btn-shuffle" id="btnSurprise">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 3l-1 6 5-2-3 5 6 1-6 2 3 5-5-2 1 6-4-5-4 5 1-6-5 2 3-5-6-2 6-1-3-5 5 2-1-6 4 5z"></path>
+            </svg>
+            Surprise
+          </button>
+        </div>
+        <button class="btn-shuffle" id="btnCopyLink">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.2 1.2"></path>
+            <path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.2-1.2"></path>
+          </svg>
+          Copy Design Link
+        </button>
+        <div class="status-line" id="statusLine"></div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">Recent</div>
+        <div class="recent-grid" id="recentGrid"></div>
+      </div>
+
+      <div class="export-group">
+        <button class="btn-apply" id="btnApply">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M2 11l3-3 2 2 4-4 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Set Wallpaper
+        </button>
+
+        <button class="btn-export btn-desktop" id="btnDesktop">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="9" rx="1"/><path d="M5 15h6M8 12v3"/></svg>
+          Download Desktop
+        </button>
+        <div class="size-hint">3840 x 2160 px</div>
+
+        <button class="btn-export btn-mobile" id="btnMobile">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="1" width="8" height="14" rx="2"/><path d="M7.5 12.5h1"/></svg>
+          Download iPhone
+        </button>
+        <div class="size-hint">1290 x 2796 px</div>
+
+        <button class="btn-export btn-mobile" id="btnBoth">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10"/><path d="m8 9 4 4 4-4"/><path d="M5 19h14"/></svg>
+          Download Both
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  function applyTheme(isDark) {
+    document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+    const r = document.documentElement.style;
+    if (isDark) {
+      r.setProperty('--bg', '#071118');
+      r.setProperty('--bg-card', '#101a22');
+      r.setProperty('--bg-hover', '#172631');
+      r.setProperty('--bg-nav', 'rgba(7,17,24,0.78)');
+      r.setProperty('--text', '#f7fbff');
+      r.setProperty('--text-muted', '#93a4af');
+      r.setProperty('--border', 'rgba(255,255,255,0.12)');
+    } else {
+      r.setProperty('--bg', '#f4f6f4');
+      r.setProperty('--bg-card', '#ffffff');
+      r.setProperty('--bg-hover', '#edf1ee');
+      r.setProperty('--bg-nav', 'rgba(255,255,255,0.78)');
+      r.setProperty('--text', '#11191c');
+      r.setProperty('--text-muted', '#526066');
+      r.setProperty('--border', 'rgba(17,25,28,0.14)');
+    }
+  }
+
+  const saved = localStorage.getItem('prismwall-theme') || 'dark';
+  applyTheme(saved === 'dark');
+  if (saved === 'light') {
+    document.getElementById('themeLight').classList.add('active');
+    document.getElementById('themeDark').classList.remove('active');
+  }
+
+  document.getElementById('themeDark').onclick = () => {
+    localStorage.setItem('prismwall-theme', 'dark');
+    applyTheme(true);
+    document.getElementById('themeDark').classList.add('active');
+    document.getElementById('themeLight').classList.remove('active');
+  };
+
+  document.getElementById('themeLight').onclick = () => {
+    localStorage.setItem('prismwall-theme', 'light');
+    applyTheme(false);
+    document.getElementById('themeLight').classList.add('active');
+    document.getElementById('themeDark').classList.remove('active');
+  };
+</script>
+<script src="../js/engine.global.js"></script>
+<script src="../js/generator.global.js"></script>
+</body>
+</html>
